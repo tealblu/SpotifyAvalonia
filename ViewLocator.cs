@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using SpotivyAvalonia.ViewModels;
+using SpotifyAvalonia.ViewModels;
 using System;
 
-namespace SpotivyAvalonia
+namespace SpotifyAvalonia
 {
     public class ViewLocator : IDataTemplate
     {

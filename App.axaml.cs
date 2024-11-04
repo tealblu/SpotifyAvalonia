@@ -3,10 +3,10 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-using SpotivyAvalonia.ViewModels;
-using SpotivyAvalonia.Views;
+using SpotifyAvalonia.ViewModels;
+using SpotifyAvalonia.Views;
 
-namespace SpotivyAvalonia
+namespace SpotifyAvalonia
 {
     public partial class App : Application
     {

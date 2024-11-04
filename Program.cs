@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace SpotivyAvalonia
+namespace SpotifyAvalonia
 {
     internal sealed class Program
     {

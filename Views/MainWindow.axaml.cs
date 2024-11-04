@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace SpotivyAvalonia.Views
+namespace SpotifyAvalonia.Views
 {
     public partial class MainWindow : Window
     {
