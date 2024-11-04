@@ -13,15 +13,13 @@ namespace SpotifyAvalonia.ViewModels
         private string mainWindowHeader = "SpotifyAvalonia";
 
         [ObservableProperty]
-        private string authStatus = "Not logged in";
+        private string messageBox = "Not logged in";
 
-        public void LoginCommand()
+        public async Task LoginCommand()
         {
-            AuthStatus = "Logging in...";
+            MessageBox = "not implemented";
 
-            SpotifyAPIHandler.GetNewAccessToken();
-
-            return;
+            await SpotifyAPIHandler.GetNewAccessToken();
         }
 #pragma warning restore CA1822 // Mark members as static
     }

@@ -9,8 +9,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SpotifyAvalonia.Controllers
-{ 
-    // Class to interact with Spotify API
+{
+    internal class SpotifyAccessToken
+    {
+        public string access_token { get; set; }
+        public string token_type { get; set; }
+        public int expires_in { get; set; }
+    }
+
     internal static class SpotifyAPIHandler
     {
         private static string? AccessToken { get; set; }
@@ -54,12 +60,5 @@ namespace SpotifyAvalonia.Controllers
                 }
             }
         }
-    }
-
-    internal class SpotifyAccessToken
-    {
-        public string access_token { get; set; }
-        public string token_type { get; set; }
-        public int expires_in { get; set; }
     }
 }

@@ -21,6 +21,6 @@
 		<Button Command="{Binding LoginCommand}" Content="Login" Grid.Row="1" />
 
 		<!-- Status text block in the third row -->
-		<TextBlock Text="{Binding AuthStatus}" Grid.Row="2" />
+		<TextBlock Text="{Binding MessageBox}" Grid.Row="2" />
 	</Grid>
 </Window>
