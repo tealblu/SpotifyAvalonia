@@ -13,28 +13,9 @@ namespace SpotifyAvalonia.Controllers
 
         private HTTPHandler http;
 
-        private static string _token = "";
-
-        public static string Token
-        {
-            get
-            {
-                return _token;
-            }
-            set
-            {
-                _token = value;
-            }
-        }
-
         public SpotifyAPIHandler() 
         {
             http = new HTTPHandler(baseUrl);
-        }
-
-        public SpotifyAPIHandler(string token)
-        {
-            http = new HTTPHandler(baseUrl, _token);
         }
     }
 }
