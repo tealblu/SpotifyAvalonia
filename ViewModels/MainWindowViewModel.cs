@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using SpotifyAvalonia.Controllers;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace SpotifyAvalonia.ViewModels
 {
@@ -18,7 +19,9 @@ namespace SpotifyAvalonia.ViewModels
         {
             AuthStatus = "Logging in...";
 
-            AuthStatus = SpotifyAPIHandler.GetNewAccessToken().Result;
+            SpotifyAPIHandler.GetNewAccessToken();
+
+            return;
         }
 #pragma warning restore CA1822 // Mark members as static
     }

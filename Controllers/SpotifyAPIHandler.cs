@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,7 +13,9 @@ namespace SpotifyAvalonia.Controllers
     // Class to interact with Spotify API
     internal static class SpotifyAPIHandler
     {
-        public static async Task<string> GetNewAccessToken()
+        private static string? AccessToken { get; set; }
+
+        public static async Task GetNewAccessToken()
         {
             string clientID = "";
             string clientSecret = "";
@@ -27,25 +30,29 @@ namespace SpotifyAvalonia.Controllers
                 clientSecret = config["ClientSecret"];
             }
 
-            string url = "https://accounts.spotify.com/api/token";
+            string url = "https://accounts.spotify.com/api/token/";
 
             using (HttpClient client = new HttpClient())
             {
-                // Prepare body with client credentials
-                string body = $"grant_type=client_credentials&client_id={clientID}&client_secret={clientSecret}";
-                var content = new StringContent(body, Encoding.UTF8, "application/x-www-form-urlencoded");
+                var formData = new Dictionary<string, string>
+                {
+                    { "grant_type", "client_credentials" },
+                    { "client_id", clientID },
+                    { "client_secret", clientSecret }
+                };
 
-                // Send POST request
+                var content = new FormUrlEncodedContent(formData);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
                 var response = await client.PostAsync(url, content);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseBody);
-                    return responseBody;
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var accessToken = JsonSerializer.Deserialize<SpotifyAccessToken>(responseString);
+                    AccessToken = accessToken?.access_token;
                 }
             }
-
-            return "";
         }
     }
 
