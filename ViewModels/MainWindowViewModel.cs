@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using SpotifyAvalonia.Controllers;
 using SpotifyAvalonia.Models;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -22,9 +23,11 @@ namespace SpotifyAvalonia.ViewModels
 
             Task.Run(async () =>
             {
-                Artist artist = await SpotifyAPIHandler.GetArtist("5mGnbFnoUYEUNE5EKnQY7R");
+                List<Artist> artists = await SpotifyAPIHandler.SearchForArtist("Driftless Pony Club");
 
-                MessageBox = artist.Name;
+                string artistName = artists[0].Name;
+
+                MessageBox = artistName;
             });
         }
 #pragma warning restore CA1822 // Mark members as static
