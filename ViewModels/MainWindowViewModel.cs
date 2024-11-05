@@ -15,19 +15,21 @@ namespace SpotifyAvalonia.ViewModels
         private string mainWindowHeader = "SpotifyAvalonia";
 
         [ObservableProperty]
-        private string messageBox = "";
+        private ObservableCollection<string> itemList = new ObservableCollection<string>();
 
         public void ButtonCommand()
         {
-            MessageBox = "loading...";
-
             Task.Run(async () =>
             {
                 List<Album> albums = await SpotifyAPIHandler.SearchForAlbum("Clancy");
 
                 if (albums != null && albums.Count > 0)
                 {
-                    MessageBox = albums[0].Artists[0].Name;
+                    ItemList.Clear();
+                    foreach (Album album in albums)
+                    {
+                        ItemList.Add(album.Name);
+                    }
                 }
             });
         }

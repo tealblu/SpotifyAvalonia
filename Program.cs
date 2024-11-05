@@ -17,7 +17,7 @@ namespace SpotifyAvalonia
             .StartWithClassicDesktopLifetime(args);
 
             // set up api access
-            await SpotifyAPIHandler.GetNewAccessToken();
+            await SpotifyAuthHandler.GetNewAccessToken();
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.

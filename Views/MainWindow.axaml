@@ -21,6 +21,8 @@
 		<Button Command="{Binding ButtonCommand}" Content="Press me!" Grid.Row="1" />
 
 		<!-- Status text block in the third row -->
-		<TextBlock Text="{Binding MessageBox}" Grid.Row="2" />
+		<ScrollViewer Grid.Row="2">
+			<ListBox ItemsSource="{Binding ItemList}"></ListBox>
+		</ScrollViewer>
 	</Grid>
 </Window>
