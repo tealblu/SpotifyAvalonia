@@ -13,7 +13,7 @@ namespace SpotifyAvalonia.ViewModels
         private string mainWindowHeader = "SpotifyAvalonia";
 
         [ObservableProperty]
-        private string messageBox = "Not logged in";
+        private string messageBox = "";
 
         public void ButtonCommand()
         {

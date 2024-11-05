@@ -32,8 +32,14 @@ namespace SpotifyAvalonia.Controllers
                 string json = File.ReadAllText(jsonpath);
                 var config = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
 
-                clientID = config["ClientID"];
-                clientSecret = config["ClientSecret"];
+                if (config != null)
+                {
+                    clientID = config["ClientID"];
+                    clientSecret = config["ClientSecret"];
+                } else
+                {
+                    throw new Exception("Unable to read appsettings.json");
+                }
             }
 
             string url = "https://accounts.spotify.com/api/token/";
