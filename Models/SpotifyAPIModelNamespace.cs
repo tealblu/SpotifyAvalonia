@@ -98,6 +98,7 @@ namespace SpotifyAvalonia.Models
         public string? ID { get; set; } = "Unknown";
         public string? Type { get; set; } = "Unknown";
         public string? URL => "https://open.spotify.com/album/" + ID;
+        public List<Artist>? Artists { get; set; } = new List<Artist>();
 
         public Album() { }
 
@@ -115,6 +116,8 @@ namespace SpotifyAvalonia.Models
             Name = root.GetProperty("name").GetString();
             ID = root.GetProperty("id").GetString();
             Type = root.GetProperty("album_type").GetString();
+
+            Artists = root.GetProperty("artists").EnumerateArray().Select(x => new Artist(x.ToString())).ToList();
         }
     }
 }
