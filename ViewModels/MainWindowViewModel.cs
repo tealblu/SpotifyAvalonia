@@ -23,7 +23,9 @@ namespace SpotifyAvalonia.ViewModels
 
             Task.Run(async () =>
             {
-                Track track = await SpotifyAPIHandler.GetTrack("6urgjBOT3NTkyIb3EX2yhX");
+                List<Track> tracks = await SpotifyAPIHandler.SearchForTrack("Calypso Spiderbait");
+
+                Track track = tracks[0];
 
                 MessageBox = track.Name;
             });
