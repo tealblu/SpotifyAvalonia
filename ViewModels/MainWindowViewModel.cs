@@ -21,16 +21,7 @@ namespace SpotifyAvalonia.ViewModels
         {
             Task.Run(async () =>
             {
-                List<Album> albums = await SpotifyAPIHandler.SearchForAlbum("Clancy");
-
-                if (albums != null && albums.Count > 0)
-                {
-                    ItemList.Clear();
-                    foreach (Album album in albums)
-                    {
-                        ItemList.Add(album.Name);
-                    }
-                }
+                SpotifyAuthHandler.RequestUserAuthorization();
             });
         }
 #pragma warning restore CA1822 // Mark members as static

@@ -8,10 +8,12 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace SpotifyAvalonia.Controllers
 {
-    internal class SpotifyAuthHandler
+    internal static class SpotifyAuthHandler
     {
         #region Client ID and Secret
         private static string _clientID = "";
@@ -75,17 +77,54 @@ namespace SpotifyAvalonia.Controllers
         #endregion
 
         #region Authorization Code with PKCE
-        private static string _codeVerifier = GenerateRandomString();
-        private static void GenerateNewCodeVerifier() => _codeVerifier = GenerateRandomString();
-
         private static string GenerateRandomString(int length = 16) => string.Concat(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", length).Select(s => s[new Random().Next(s.Length)]));
         private static string Sha256(string input) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input)));
         private static string Base64Encode(string input) => Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
-        public static string GenerateCodeChallenge(string codeVerifier) => Base64Encode(Sha256(codeVerifier));
+
+        // code from https://stackoverflow.com/a/43232486
+        private static void OpenUrlInBrowser(string url)
+        {
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
 
         public static void RequestUserAuthorization()
         {
-            string clientID = 
+            string clientID = _clientID;
+            string redirectURI = "http://localhost:5000/callback";
+            string scope = "user-read-private user-read-email";
+            string authUrl = $"https://accounts.spotify.com/authorize";
+
+            string codeVerifier = GenerateRandomString();
+            string codeChallenge = Base64Encode(Sha256(codeVerifier));
+
+            // TODO save the code verifier here?
+
+            string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={redirectURI}&scope={scope}&code_challenge={codeChallenge}&code_challenge_method=S256";
+            OpenUrlInBrowser(url);
         }
         #endregion
     }
