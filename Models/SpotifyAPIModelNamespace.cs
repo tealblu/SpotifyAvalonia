@@ -20,7 +20,6 @@ namespace SpotifyAvalonia.Models
         public string? ID { get; set; } = "Unknown";
         public int? Popularity { get; set; } = -1;
         public List<string?> Genres { get; set; } = new List<string?>();
-        
         public string URL => "https://open.spotify.com/artist/" + ID;
 
         public Artist() { }
@@ -99,5 +98,22 @@ namespace SpotifyAvalonia.Models
         public string? Name { get; set; } = "Unknown";
         public string? ID { get; set; } = "Unknown";
         public string? URL => "https://open.spotify.com/album/" + ID;
+
+        public Album() { }
+
+        public Album(string jsonString)
+        {
+            ParseJsonString(jsonString);
+        }
+
+        public void ParseJsonString(string jsonString)
+        {
+            using JsonDocument doc = JsonDocument.Parse(jsonString);
+
+            JsonElement root = doc.RootElement;
+
+            Name = root.GetProperty("name").GetString();
+            ID = root.GetProperty("id").GetString();
+        }
     }
 }
