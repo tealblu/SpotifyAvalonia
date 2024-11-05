@@ -23,11 +23,12 @@ namespace SpotifyAvalonia.ViewModels
 
             Task.Run(async () =>
             {
-                List<Track> tracks = await SpotifyAPIHandler.SearchForTrack("Calypso Spiderbait");
+                List<Album> albums = await SpotifyAPIHandler.SearchForAlbum("Clancy");
 
-                Track track = tracks[0];
-
-                MessageBox = track.Name;
+                if (albums != null && albums.Count > 0)
+                {
+                    MessageBox = albums[0].Artists[0].Name;
+                }
             });
         }
 #pragma warning restore CA1822 // Mark members as static

@@ -76,11 +76,10 @@ namespace SpotifyAvalonia.Models
 
             Name = root.GetProperty("name").GetString();
             ID = root.GetProperty("id").GetString();
-            // Album
+            // TODO Implement album stuff after implementing album handler
             Popularity = root.GetProperty("popularity").GetInt32();
             Duration = root.GetProperty("duration_ms").GetInt32();
             var artistArray = root.GetProperty("artists").EnumerateArray();
-
             foreach (var artist in artistArray)
             {
                 if (Artists == null)
@@ -97,7 +96,9 @@ namespace SpotifyAvalonia.Models
     {
         public string? Name { get; set; } = "Unknown";
         public string? ID { get; set; } = "Unknown";
+        public string? Type { get; set; } = "Unknown";
         public string? URL => "https://open.spotify.com/album/" + ID;
+        public List<Artist>? Artists { get; set; } = new List<Artist>();
 
         public Album() { }
 
@@ -114,6 +115,9 @@ namespace SpotifyAvalonia.Models
 
             Name = root.GetProperty("name").GetString();
             ID = root.GetProperty("id").GetString();
+            Type = root.GetProperty("album_type").GetString();
+
+            Artists = root.GetProperty("artists").EnumerateArray().Select(x => new Artist(x.ToString())).ToList();
         }
     }
 }

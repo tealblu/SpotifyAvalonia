@@ -13,7 +13,7 @@ namespace SpotifyAvalonia.Controllers
 {
     internal static class SpotifyAPIHandler
     {
-        #region Authentication
+        #region Utils
         private static string? AccessToken { get; set; } = null;
 
         public static async Task GetNewAccessToken()
@@ -60,6 +60,28 @@ namespace SpotifyAvalonia.Controllers
                     AccessToken = accessToken?.access_token;
                 }
             }
+        }
+
+        public static async Task<string> SendRequest(string url)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
+                var response = await client.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    return responseString;
+                }
+            }
+
+            return "";
         }
         #endregion
 
@@ -127,16 +149,10 @@ namespace SpotifyAvalonia.Controllers
                 await GetNewAccessToken();
             }
 
-            string responseString = "";
             string url = "https://api.spotify.com/v1/tracks/" + trackID;
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
-                var response = await client.GetAsync(url);
-                responseString = await response.Content.ReadAsStringAsync();
-            }
+            string responseString = await SendRequest(url);
 
-            if (responseString != null)
+            if (responseString != "")
             {
                 return new Track(responseString);
             }
@@ -153,16 +169,10 @@ namespace SpotifyAvalonia.Controllers
                 await GetNewAccessToken();
             }
 
-            string responseString = "";
             string url = "https://api.spotify.com/v1/search?q=" + trackName + "&type=track";
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
-                var response = await client.GetAsync(url);
-                responseString = await response.Content.ReadAsStringAsync();
-            }
+            string responseString = await SendRequest(url);
 
-            if (responseString != null)
+            if (responseString != "")
             {
                 JsonDocument doc = JsonDocument.Parse(responseString);
                 JsonElement root = doc.RootElement;
@@ -172,6 +182,50 @@ namespace SpotifyAvalonia.Controllers
             }
 
             return new List<Track>();
+        }
+        #endregion
+
+        #region Albums
+        public static async Task<Album> GetAlbum(string albumID)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string url = "https://api.spotify.com/v1/albums/" + albumID;
+            string responseString = await SendRequest(url);
+
+            if (responseString != "")
+            {
+                return new Album(responseString);
+            }
+            else
+            {
+                return new Album();
+            }
+        }
+
+        public static async Task<List<Album>> SearchForAlbum(string albumName)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string url = "https://api.spotify.com/v1/search?q=" + albumName + "&type=album";
+            string responseString = await SendRequest(url);
+
+            if (responseString != "")
+            {
+                JsonDocument doc = JsonDocument.Parse(responseString);
+                JsonElement root = doc.RootElement;
+                List<Album> albums = root.GetProperty("albums").GetProperty("items").EnumerateArray().Select(x => new Album(x.ToString())).ToList();
+                
+                return albums;
+            }
+
+            return new List<Album>();
         }
         #endregion
     }
