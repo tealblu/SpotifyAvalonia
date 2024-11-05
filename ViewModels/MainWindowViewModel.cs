@@ -23,11 +23,9 @@ namespace SpotifyAvalonia.ViewModels
 
             Task.Run(async () =>
             {
-                List<Artist> artists = await SpotifyAPIHandler.SearchForArtist("Driftless Pony Club");
+                Track track = await SpotifyAPIHandler.GetTrack("6urgjBOT3NTkyIb3EX2yhX");
 
-                string artistName = artists[0].Name;
-
-                MessageBox = artistName;
+                MessageBox = track.Name;
             });
         }
 #pragma warning restore CA1822 // Mark members as static
