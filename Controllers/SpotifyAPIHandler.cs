@@ -205,6 +205,28 @@ namespace SpotifyAvalonia.Controllers
                 return new Album();
             }
         }
+
+        public static async Task<List<Album>> SearchForAlbum(string albumName)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string url = "https://api.spotify.com/v1/search?q=" + albumName + "&type=album";
+            string responseString = await SendRequest(url);
+
+            if (responseString != "")
+            {
+                JsonDocument doc = JsonDocument.Parse(responseString);
+                JsonElement root = doc.RootElement;
+                List<Album> albums = root.GetProperty("albums").GetProperty("items").EnumerateArray().Select(x => new Album(x.ToString())).ToList();
+                
+                return albums;
+            }
+
+            return new List<Album>();
+        }
         #endregion
     }
 }
