@@ -13,13 +13,12 @@ namespace SpotifyAvalonia.Controllers
 {
     internal class SpotifyAuthHandler
     {
-        public static string? AccessToken { get; set; } = null;
+        #region Client ID and Secret
+        private static string _clientID = "";
+        private static string _clientSecret = "";
 
-        public static async Task GetNewAccessToken()
+        private static void GetClientIDAndSecret()
         {
-            string clientID = "";
-            string clientSecret = "";
-
             string jsonpath = "C:\\Projects\\SpotifyAvalonia\\appsettings.json";
             if (File.Exists(jsonpath))
             {
@@ -28,14 +27,26 @@ namespace SpotifyAvalonia.Controllers
 
                 if (config != null)
                 {
-                    clientID = config["ClientID"];
-                    clientSecret = config["ClientSecret"];
+                    _clientID = config["ClientID"];
+                    _clientSecret = config["ClientSecret"];
                 }
                 else
                 {
                     throw new Exception("Unable to read appsettings.json");
                 }
             }
+        }
+        #endregion
+
+        #region Access Token
+        public static string? AccessToken { get; set; } = null;
+
+        public static async Task GetNewAccessToken()
+        {
+            GetClientIDAndSecret();
+
+            string clientID = _clientID;
+            string clientSecret = _clientSecret;
 
             string url = "https://accounts.spotify.com/api/token/";
 
@@ -61,5 +72,21 @@ namespace SpotifyAvalonia.Controllers
                 }
             }
         }
+        #endregion
+
+        #region Authorization Code with PKCE
+        private static string _codeVerifier = GenerateRandomString();
+        private static void GenerateNewCodeVerifier() => _codeVerifier = GenerateRandomString();
+
+        private static string GenerateRandomString(int length = 16) => string.Concat(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", length).Select(s => s[new Random().Next(s.Length)]));
+        private static string Sha256(string input) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input)));
+        private static string Base64Encode(string input) => Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
+        public static string GenerateCodeChallenge(string codeVerifier) => Base64Encode(Sha256(codeVerifier));
+
+        public static void RequestUserAuthorization()
+        {
+            string clientID = 
+        }
+        #endregion
     }
 }
