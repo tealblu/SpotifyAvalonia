@@ -13,6 +13,7 @@ namespace SpotifyAvalonia.Controllers
 {
     internal static class SpotifyAPIHandler
     {
+        #region Authentication
         private static string? AccessToken { get; set; } = null;
 
         public static async Task GetNewAccessToken()
@@ -60,7 +61,9 @@ namespace SpotifyAvalonia.Controllers
                 }
             }
         }
+        #endregion
 
+        #region Artists
         public static async Task<Artist> GetArtist(string artistID)
         {
             if (AccessToken == null)
@@ -114,7 +117,9 @@ namespace SpotifyAvalonia.Controllers
 
             return new List<Artist>();
         }
+        #endregion
 
+        #region Tracks
         public static async Task<Track> GetTrack(string trackID)
         {
             if (AccessToken == null)
@@ -168,5 +173,6 @@ namespace SpotifyAvalonia.Controllers
 
             return new List<Track>();
         }
+        #endregion
     }
 }
