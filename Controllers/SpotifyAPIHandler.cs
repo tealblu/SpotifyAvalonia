@@ -86,5 +86,33 @@ namespace SpotifyAvalonia.Controllers
                 return new Artist();
             }
         }
+
+        public static async Task<List<Artist>> SearchForArtist(string artistName)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string responseString = "";
+            string url = "https://api.spotify.com/v1/search?q=" + artistName + "&type=artist";
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
+                var response = await client.GetAsync(url);
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            if (responseString != null)
+            {
+                JsonDocument doc = JsonDocument.Parse(responseString);
+                JsonElement root = doc.RootElement;
+                List<Artist> artists = root.GetProperty("artists").GetProperty("items").EnumerateArray().Select(x => new Artist(x.ToString())).ToList();
+
+                return artists;
+            }
+
+            return new List<Artist>();
+        }
     }
 }
