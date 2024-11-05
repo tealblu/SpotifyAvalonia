@@ -15,11 +15,9 @@ namespace SpotifyAvalonia.ViewModels
         [ObservableProperty]
         private string messageBox = "Not logged in";
 
-        public async Task LoginCommand()
+        public void ButtonCommand()
         {
             MessageBox = "not implemented";
-
-            await SpotifyAPIHandler.GetNewAccessToken();
         }
 #pragma warning restore CA1822 // Mark members as static
     }

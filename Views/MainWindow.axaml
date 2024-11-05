@@ -18,7 +18,7 @@
 		<TextBlock Classes="h1" Text="{Binding MainWindowHeader}" Grid.Row="0" />
 
 		<!-- Button to launch auth flow in the second row -->
-		<Button Command="{Binding LoginCommand}" Content="Login" Grid.Row="1" />
+		<Button Command="{Binding ButtonCommand}" Content="Press me!" Grid.Row="1" />
 
 		<!-- Status text block in the third row -->
 		<TextBlock Text="{Binding MessageBox}" Grid.Row="2" />
