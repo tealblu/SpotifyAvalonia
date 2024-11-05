@@ -7,13 +7,13 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using SpotifyAvalonia.Models;
 
 namespace SpotifyAvalonia.Controllers
-{ 
-    // Class to interact with Spotify API
+{
     internal static class SpotifyAPIHandler
     {
-        private static string? AccessToken { get; set; }
+        private static string? AccessToken { get; set; } = null;
 
         public static async Task GetNewAccessToken()
         {
@@ -26,8 +26,14 @@ namespace SpotifyAvalonia.Controllers
                 string json = File.ReadAllText(jsonpath);
                 var config = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
 
-                clientID = config["ClientID"];
-                clientSecret = config["ClientSecret"];
+                if (config != null)
+                {
+                    clientID = config["ClientID"];
+                    clientSecret = config["ClientSecret"];
+                } else
+                {
+                    throw new Exception("Unable to read appsettings.json");
+                }
             }
 
             string url = "https://accounts.spotify.com/api/token/";
@@ -54,12 +60,31 @@ namespace SpotifyAvalonia.Controllers
                 }
             }
         }
-    }
 
-    internal class SpotifyAccessToken
-    {
-        public string access_token { get; set; }
-        public string token_type { get; set; }
-        public int expires_in { get; set; }
+        public static async Task<Artist> GetArtist(string artistID)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string responseString = "";
+            string url = "https://api.spotify.com/v1/artists/" + artistID;
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
+                var response = await client.GetAsync(url);
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            if (responseString != null)
+            {
+                return new Artist(responseString);
+            } 
+            else
+            {
+                return new Artist();
+            }
+        }
     }
 }

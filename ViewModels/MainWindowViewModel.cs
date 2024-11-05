@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SpotifyAvalonia.Controllers;
+using SpotifyAvalonia.Models;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -13,15 +14,18 @@ namespace SpotifyAvalonia.ViewModels
         private string mainWindowHeader = "SpotifyAvalonia";
 
         [ObservableProperty]
-        private string authStatus = "Not logged in";
+        private string messageBox = "";
 
-        public void LoginCommand()
+        public void ButtonCommand()
         {
-            AuthStatus = "Logging in...";
+            MessageBox = "loading...";
 
-            SpotifyAPIHandler.GetNewAccessToken();
+            Task.Run(async () =>
+            {
+                Artist artist = await SpotifyAPIHandler.GetArtist("5mGnbFnoUYEUNE5EKnQY7R");
 
-            return;
+                MessageBox = artist.Name;
+            });
         }
 #pragma warning restore CA1822 // Mark members as static
     }
