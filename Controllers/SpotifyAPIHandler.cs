@@ -114,5 +114,59 @@ namespace SpotifyAvalonia.Controllers
 
             return new List<Artist>();
         }
+
+        public static async Task<Track> GetTrack(string trackID)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string responseString = "";
+            string url = "https://api.spotify.com/v1/tracks/" + trackID;
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
+                var response = await client.GetAsync(url);
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            if (responseString != null)
+            {
+                return new Track(responseString);
+            }
+            else
+            {
+                return new Track();
+            }
+        }
+
+        public static async Task<List<Track>> SearchForTrack(string trackName)
+        {
+            if (AccessToken == null)
+            {
+                await GetNewAccessToken();
+            }
+
+            string responseString = "";
+            string url = "https://api.spotify.com/v1/search?q=" + trackName + "&type=track";
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken!);
+                var response = await client.GetAsync(url);
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            if (responseString != null)
+            {
+                JsonDocument doc = JsonDocument.Parse(responseString);
+                JsonElement root = doc.RootElement;
+                List<Track> tracks = root.GetProperty("tracks").GetProperty("items").EnumerateArray().Select(x => new Track(x.ToString())).ToList();
+            
+                return tracks;
+            }
+
+            return new List<Track>();
+        }
     }
 }
