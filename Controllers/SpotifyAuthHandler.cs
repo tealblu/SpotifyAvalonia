@@ -213,6 +213,15 @@ namespace SpotifyAvalonia.Controllers
                     {
                         throw new Exception("Refresh token not found in response");
                     }
+
+                    if (tokenData != null && tokenData.TryGetValue("scope", out JsonElement scopeElement))
+                    {
+                        UserAccessToken.scope = scopeElement.GetString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Scope not found in response");
+                    }
                 }
                 catch (HttpRequestException ex)
                 {
@@ -279,6 +288,15 @@ namespace SpotifyAvalonia.Controllers
                     else
                     {
                         throw new Exception("Refresh token not found in response");
+                    }
+
+                    if (tokenData != null && tokenData.TryGetValue("scope", out JsonElement scopeElement))
+                    {
+                        UserAccessToken.scope = scopeElement.GetString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Scope not found in response");
                     }
                 }
                 catch (HttpRequestException ex)

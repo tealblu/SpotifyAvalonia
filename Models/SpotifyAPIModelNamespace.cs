@@ -19,6 +19,7 @@ namespace SpotifyAvalonia.Models
         public string access_token { get; set; } = "";
         public DateTime expires_at { get; set; } = DateTime.Now;
         public string refresh_token { get; set; } = "";
+        public string scope { get; set; } = "";
 
         public void SetExpiryTime(int seconds) => expires_at = DateTime.Now.AddSeconds(seconds);
         public bool IsExpired() => DateTime.Now > expires_at;
