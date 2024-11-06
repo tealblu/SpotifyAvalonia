@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Web.Http;
 
 namespace SpotifyAvalonia.Controllers
 {
@@ -122,6 +123,10 @@ namespace SpotifyAvalonia.Controllers
             string codeChallenge = Base64Encode(Sha256(codeVerifier));
 
             // TODO save the code verifier here?
+
+            // start http server to receive authorization code
+            var server = new HttpServer();
+            server.
 
             string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={redirectURI}&scope={scope}&code_challenge={codeChallenge}&code_challenge_method=S256";
             OpenUrlInBrowser(url);
