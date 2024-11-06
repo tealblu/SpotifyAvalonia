@@ -220,6 +220,73 @@ namespace SpotifyAvalonia.Controllers
                 }
             }
         }
+        public static async Task RefreshUserAccessToken()
+        {
+            if (_clientID == "")
+            {
+                GetClientIDAndSecret();
+            }
+
+            string clientID = _clientID;
+            string url = "https://accounts.spotify.com/api/token";
+            string redirectUri = _redirectUri;
+
+            if (UserAccessToken.refresh_token == "" || UserAccessToken.IsExpired())
+            {
+                await RequestUserAccessToken();
+            }
+
+            using (var client = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("client_id", clientID),
+                    new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                    new KeyValuePair<string, string>("refresh_token", UserAccessToken.refresh_token)
+                });
+
+                try
+                {
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    response.EnsureSuccessStatusCode();
+                    var tokenData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(responseBody);
+
+                    if (tokenData != null && tokenData.TryGetValue("access_token", out JsonElement accessTokenElement))
+                    {
+                        UserAccessToken.access_token = accessTokenElement.GetString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Access token not found in response");
+                    }
+
+                    if (tokenData != null && tokenData.TryGetValue("expires_in", out JsonElement expiresInElement))
+                    {
+                        int expiresIn = (int?)expiresInElement.GetInt32() ?? 0;
+                        UserAccessToken.SetExpiryTime(expiresIn);
+                    }
+                    else
+                    {
+                        throw new Exception("Expiry not found in response");
+                    }
+
+                    if (tokenData != null && tokenData.TryGetValue("refresh_token", out JsonElement refreshTokenElement))
+                    {
+                        UserAccessToken.refresh_token = refreshTokenElement.GetString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Refresh token not found in response");
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw new Exception($"Failed to refresh access token: {ex.Message}", ex);
+                }
+            }
+        }
 
         #endregion
     }

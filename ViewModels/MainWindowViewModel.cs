@@ -21,7 +21,7 @@ namespace SpotifyAvalonia.ViewModels
         {
             Task.Run(async () =>
             {
-                await SpotifyAuthHandler.RequestUserAccessToken();
+                await SpotifyAuthHandler.RefreshUserAccessToken();
             });
         }
 #pragma warning restore CA1822 // Mark members as static
