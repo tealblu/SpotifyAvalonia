@@ -11,6 +11,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Web.Http;
+using System.Security.Cryptography;
 
 namespace SpotifyAvalonia.Controllers
 {
@@ -80,9 +81,22 @@ namespace SpotifyAvalonia.Controllers
         #region Authorization Code with PKCE -> Access Token
         private static string _redirectUri = $"http://localhost:5000/callback/";
 
-        private static string GenerateRandomString(int length = 64) => string.Concat(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", length).Select(s => s[new Random().Next(s.Length)]));
-        private static string Sha256(string input) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input)));
-        private static string Base64Encode(string input) => Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
+        private static string GenerateRandomString(int length = 64)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var randomBytes = new byte[length];
+            RandomNumberGenerator.Fill(randomBytes);
+            return new string(randomBytes.Select(b => chars[b % chars.Length]).ToArray());
+        }
+
+        private static byte[] Sha256(string input) => System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input));
+        private static string Base64Encode(byte[] input)
+        {
+            return Convert.ToBase64String(input)
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
+        }
 
         // code from https://stackoverflow.com/a/43232486
         private static void OpenUrlInBrowser(string url)
@@ -128,7 +142,7 @@ namespace SpotifyAvalonia.Controllers
             string authUrl = $"https://accounts.spotify.com/authorize/";
 
             string _codeVerifier = GenerateRandomString();
-            Debug.WriteLine(_codeVerifier);
+            Debug.WriteLine("\n\nCode Verifier: " + _codeVerifier);
             string codeChallenge = Base64Encode(Sha256(_codeVerifier));
             string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={Uri.EscapeDataString(redirectURI)}&scope={Uri.EscapeDataString(scope)}&code_challenge={Uri.EscapeDataString(codeChallenge)}&code_challenge_method=S256";
 
@@ -149,6 +163,7 @@ namespace SpotifyAvalonia.Controllers
             var (_authCode, _codeVerifier) = await RequestUserAuthCode();
             string authCode = _authCode;
             string codeVerifier = _codeVerifier;
+            Debug.WriteLine("\n\nCode Verifier: " + codeVerifier);
 
             if (string.IsNullOrEmpty(clientID))
             {
@@ -164,7 +179,6 @@ namespace SpotifyAvalonia.Controllers
                 //client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
 
                 // Prepare form data
-                Debug.WriteLine(codeVerifier);
                 var content = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string, string>("client_id", clientID),
