@@ -130,16 +130,14 @@ namespace SpotifyAvalonia.Controllers
 
             // TODO save the code verifier here?
 
-            
-
-            LocalHttpServer server = new LocalHttpServer(redirectURI);
             string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={Uri.EscapeDataString(redirectURI)}&scope={Uri.EscapeDataString(scope)}&code_challenge={Uri.EscapeDataString(codeChallenge)}&code_challenge_method=S256";
-            OpenUrlInBrowser(url);
 
             // start http server to receive authorization code
             string OAuthCode = "";
             Task.Run(async () =>
             {
+                LocalHttpServer server = new LocalHttpServer(redirectURI);
+                OpenUrlInBrowser(url);
                 OAuthCode = await server.StartListeningAsync();
             });
         }
