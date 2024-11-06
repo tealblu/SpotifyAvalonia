@@ -14,6 +14,16 @@ namespace SpotifyAvalonia.Models
         public int expires_in { get; set; }
     }
 
+    internal class UserAccessToken
+    {
+        public string access_token { get; set; } = "";
+        public DateTime expires_at { get; set; } = DateTime.Now;
+        public string refresh_token { get; set; } = "";
+
+        public void SetExpiryTime(int expires_in_ms) => expires_at = DateTime.Now.AddMilliseconds(expires_in_ms);
+        public bool IsExpired() => DateTime.Now > expires_at;
+    }
+
     internal class Artist
     {
         public string? Name { get; set; } = "Unknown";

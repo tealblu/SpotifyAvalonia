@@ -130,19 +130,17 @@ namespace SpotifyAvalonia.Controllers
 
         private static async Task<(string, string)> RequestUserAuthCode()
         {
-            string clientID = _clientID;
-            if (clientID == "")
+            if (_clientID == "")
             {
                 GetClientIDAndSecret();
-                clientID = _clientID;
             }
+            string clientID = _clientID;
 
             string redirectURI = _redirectUri;
             string scope = "user-read-private user-read-email";
             string authUrl = $"https://accounts.spotify.com/authorize/";
 
             string _codeVerifier = GenerateRandomString();
-            Debug.WriteLine("\n\nCode Verifier: " + _codeVerifier);
             string codeChallenge = Base64Encode(Sha256(_codeVerifier));
             string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={Uri.EscapeDataString(redirectURI)}&scope={Uri.EscapeDataString(scope)}&code_challenge={Uri.EscapeDataString(codeChallenge)}&code_challenge_method=S256";
 
@@ -155,30 +153,22 @@ namespace SpotifyAvalonia.Controllers
             return (authCode, _codeVerifier);
         }
 
-        public static async Task<string> RequestUserAccessToken()
+        public static UserAccessToken UserAccessToken { get; set; } = new UserAccessToken();
+        public static async Task RequestUserAccessToken()
         {
-            string clientID = _clientID;
-            string redirectUri = _redirectUri;
-
-            var (_authCode, _codeVerifier) = await RequestUserAuthCode();
-            string authCode = _authCode;
-            string codeVerifier = _codeVerifier;
-            Debug.WriteLine("\n\nCode Verifier: " + codeVerifier);
-
-            if (string.IsNullOrEmpty(clientID))
+            if (_clientID == "")
             {
                 GetClientIDAndSecret();
-                clientID = _clientID;
             }
 
-            string url = "https://accounts.spotify.com/api/token"; // Updated endpoint
+            string clientID = _clientID;
+            string url = "https://accounts.spotify.com/api/token";
+            string redirectUri = _redirectUri;
+
+            var (authCode, codeVerifier) = await RequestUserAuthCode();
 
             using (var client = new HttpClient())
             {
-                // Add the Content-Type header
-                //client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
-
-                // Prepare form data
                 var content = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string, string>("client_id", clientID),
@@ -192,23 +182,37 @@ namespace SpotifyAvalonia.Controllers
                 {
                     HttpResponseMessage response = await client.PostAsync(url, content);
 
-                    // Read and print the response body, even if it’s a bad request
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    Debug.WriteLine($"Response Body: {responseBody}");
-
                     response.EnsureSuccessStatusCode();
-
-                    // Read and parse the response
-                    //var responseBody = await response.Content.ReadAsStringAsync();
                     var tokenData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(responseBody);
 
-                    // Extract the access_token
                     if (tokenData != null && tokenData.TryGetValue("access_token", out JsonElement accessTokenElement))
                     {
-                        return accessTokenElement.GetString() ?? string.Empty;
+                        UserAccessToken.access_token = accessTokenElement.GetString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Access token not found in response");
                     }
 
-                    throw new Exception("Access token not found in response");
+                    if (tokenData != null && tokenData.TryGetValue("expires_in", out JsonElement expiresInElement))
+                    {
+                        int expiresIn = (int?)expiresInElement.GetInt32() ?? 0;
+                        UserAccessToken.SetExpiryTime(expiresIn);
+                    }
+                    else
+                    {
+                        throw new Exception("Expiry not found in response");
+                    }
+
+                    if (tokenData != null && tokenData.TryGetValue("refresh_token", out JsonElement refreshTokenElement))
+                    {
+                        UserAccessToken.refresh_token = refreshTokenElement.GetString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Refresh token not found in response");
+                    }
                 }
                 catch (HttpRequestException ex)
                 {
@@ -216,7 +220,6 @@ namespace SpotifyAvalonia.Controllers
                 }
             }
         }
-
 
         #endregion
     }
