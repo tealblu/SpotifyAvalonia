@@ -94,7 +94,7 @@ namespace SpotifyAvalonia.Controllers
                 // hack because of this: https://github.com/dotnet/corefx/issues/10361
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    url = url.Replace("&", "^&");
+                    // url = url.Replace("&", "^&");
                     Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -115,21 +115,33 @@ namespace SpotifyAvalonia.Controllers
         public static void RequestUserAuthorization()
         {
             string clientID = _clientID;
-            string redirectURI = "http://localhost:5000/callback";
+            if (clientID == "")
+            {
+                GetClientIDAndSecret();
+                clientID = _clientID;
+            }
+
+            string redirectURI = $"http://localhost:5000/callback/";
             string scope = "user-read-private user-read-email";
-            string authUrl = $"https://accounts.spotify.com/authorize";
+            string authUrl = $"https://accounts.spotify.com/authorize/";
 
             string codeVerifier = GenerateRandomString();
             string codeChallenge = Base64Encode(Sha256(codeVerifier));
 
             // TODO save the code verifier here?
 
-            // start http server to receive authorization code
-            var server = new HttpServer();
-            server.
+            
 
-            string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={redirectURI}&scope={scope}&code_challenge={codeChallenge}&code_challenge_method=S256";
+            LocalHttpServer server = new LocalHttpServer(redirectURI);
+            string url = $"{authUrl}?client_id={clientID}&response_type=code&redirect_uri={Uri.EscapeDataString(redirectURI)}&scope={Uri.EscapeDataString(scope)}&code_challenge={Uri.EscapeDataString(codeChallenge)}&code_challenge_method=S256";
             OpenUrlInBrowser(url);
+
+            // start http server to receive authorization code
+            string OAuthCode = "";
+            Task.Run(async () =>
+            {
+                OAuthCode = await server.StartListeningAsync();
+            });
         }
         #endregion
     }
